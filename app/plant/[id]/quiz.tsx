@@ -10,6 +10,8 @@ export default function QuizStardew() {
   const [submitting, setSubmitting] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+
 
     useEffect(() => {
       async function load() {
@@ -39,21 +41,23 @@ export default function QuizStardew() {
     //   load();
     // }, []);
 
-  async function handleSubmit(index: number) {
-    setSubmitting(true);
-    setSelected(index);
-
-    const result = await submitQuiz(String(id), index);
-    const isCorrect = result.correct;
-
-    setFeedback(isCorrect ? "Correct! 🌱" : "Try again! 🌧️");
-
-    if (isCorrect) {
-      setTimeout(() => router.push("/garden"), 1200);
+    async function handleSubmit(index: number) {
+      setSubmitting(true);
+      setSelected(index);
+    
+      const result = await submitQuiz(String(id), index);
+      const correct = result.correct;
+    
+      setIsCorrect(correct);
+      setFeedback(correct ? "Correct! 🌱" : "Try again! 🌧️");
+    
+      if (correct) {
+        setTimeout(() => router.push("/garden"), 1200);
+      }
+    
+      setSubmitting(false);
     }
-
-    setSubmitting(false);
-  }
+    
 
   if (loading) {
     return (
@@ -76,12 +80,19 @@ export default function QuizStardew() {
       <View style={styles.optionsContainer}>
         {quiz.options.map((opt: string, idx: number) => {
           const isSelected = selected === idx;
+
+          const optionStyle = [
+            styles.option,
+            isSelected && isCorrect === true && styles.correctOption,
+            isSelected && isCorrect === false && styles.incorrectOption,
+          ];
+
           return (
             <TouchableOpacity
               key={idx}
               disabled={submitting}
               onPress={() => handleSubmit(idx)}
-              style={[styles.option, isSelected && styles.optionSelected]}
+              style={optionStyle}
             >
               <Text style={styles.optionText}>{opt}</Text>
             </TouchableOpacity>
@@ -164,6 +175,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6B5B4A",
   },
+  correctOption: {
+    backgroundColor: "#DDEECC",
+    borderColor: "#97B67C",
+  },
+  
+  incorrectOption: {
+    backgroundColor: "#F7D6D6",
+    borderColor: "#CC7A7A",
+  },  
 });
 
 //   async function handleAnswer(i: number) {

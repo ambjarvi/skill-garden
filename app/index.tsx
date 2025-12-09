@@ -5,7 +5,7 @@ export default function Index() {
   const [plants, setPlants] = useState([]);
 
   useEffect(() => {
-    fetch("https://my-plant-api.onrender.com/plants")
+    fetch("https://skill-garden-backend.onrender.com")
       .then(res => res.json())
       .then(data => setPlants(data))
       .catch(err => console.error(err));

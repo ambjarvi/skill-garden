@@ -9,8 +9,15 @@ export default function QuizScreen() {
 
   useEffect(() => {
     async function load() {
-      const data = await getQuiz(String(id));
-      setQuiz(data);
+      console.log("➡ QuizScreen opened with id:", id);
+
+      try {
+        const quizData = await getQuiz(String(id));
+        console.log("✔ Quiz loaded:", quizData);
+        setQuiz(quizData);
+      } catch (err: any) {
+        console.log("❌ Error loading quiz:", err.message);
+      }
     }
     load();
   }, []);

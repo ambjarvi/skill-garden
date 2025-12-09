@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, FlatList, Text, View } from "react-native";
-import { getPlants, unlockPlant } from "../.expo/lib/api";
-import { Plant } from "../.expo/types/Plant";
+import { getPlants, unlockPlant } from "../types/api";
+import { Plant } from "../types/Plant";
 
 export default function Index() {
   const [plants, setPlants] = useState<Plant[]>([]);

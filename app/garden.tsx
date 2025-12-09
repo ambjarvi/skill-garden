@@ -1,32 +1,51 @@
-import { StyleSheet, Text, View } from "react-native";
-import plants from "../data/plants";
+import { getPlants } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 
-export default function GardenScreen() {
-  // Placeholder unlocked plants
-  const unlocked = plants.filter((p) => p.unlocked);
+export default function Garden() {
+  const [unlockedPlants, setUnlockedPlants] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      const plants = await getPlants();
+      setUnlockedPlants(plants.filter((p: any) => p.unlocked));
+    }
+    load();
+  }, []);
+
+  if (unlockedPlants.length === 0)
+    return <Text style={styles.empty}>No plants unlocked yet!</Text>;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your Garden 🌿</Text>
-
-      {unlocked.length === 0 ? (
-        <Text style={styles.subtitle}>
-          Take quizzes to unlock plants in your garden!
-        </Text>
-      ) : (
-        unlocked.map((plant) => (
-          <Text key={plant.id} style={styles.plantItem}>
-            🌱 {plant.name}
-          </Text>
-        ))
-      )}
+      <FlatList
+        data={unlockedPlants}
+        numColumns={2}
+        keyExtractor={(item) => item.id.toString()}
+        columnWrapperStyle={{ justifyContent: "space-between" }}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <Image source={{ uri: item.imageUrl }} style={styles.image} />
+            <Text style={styles.name}>{item.name}</Text>
+          </View>
+        )}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 28, fontWeight: "600", marginBottom: 10 },
-  subtitle: { fontSize: 16, color: "#555" },
-  plantItem: { fontSize: 20, marginVertical: 6 },
+  container: { padding: 20 },
+  empty: { padding: 20, fontSize: 18 },
+  card: {
+    width: "48%",
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 12,
+    marginBottom: 14,
+    alignItems: "center",
+    elevation: 2,
+  },
+  image: { width: 80, height: 80, borderRadius: 10, marginBottom: 8 },
+  name: { fontSize: 16, fontWeight: "600" },
 });

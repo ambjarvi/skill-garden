@@ -1,15 +1,26 @@
+import { getPlant } from "@/lib/api";
 import { Link, useLocalSearchParams } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import plants from "../../data/plants";
+import { useEffect, useState } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function PlantDetails() {
   const { id } = useLocalSearchParams();
-  const plant = plants.find((p) => p.id.toString() === id);
+  const [plant, setPlant] = useState<any>(null);
 
-  if (!plant) return <Text>Plant not found.</Text>;
+  useEffect(() => {
+    async function load() {
+      const data = await getPlant(Number(id));
+      setPlant(data);
+    }
+    load();
+  }, []);
+
+  if (!plant) return <Text>Loading...</Text>;
 
   return (
     <View style={styles.container}>
+      <Image source={{ uri: plant.imageUrl }} style={styles.image} />
+
       <Text style={styles.title}>{plant.name}</Text>
       <Text style={styles.description}>{plant.description}</Text>
 
@@ -23,14 +34,14 @@ export default function PlantDetails() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 28, fontWeight: "700", marginBottom: 10 },
-  description: { fontSize: 16, marginBottom: 20, color: "#444" },
+  container: { padding: 20 },
+  image: { width: "100%", height: 200, borderRadius: 12, marginBottom: 20 },
+  title: { fontSize: 26, fontWeight: "700", marginBottom: 10 },
+  description: { fontSize: 16, color: "#444", marginBottom: 20 },
   button: {
     backgroundColor: "#4CAF50",
     padding: 14,
     borderRadius: 10,
-    marginTop: 10,
   },
   buttonText: { color: "white", fontSize: 18, textAlign: "center" },
 });

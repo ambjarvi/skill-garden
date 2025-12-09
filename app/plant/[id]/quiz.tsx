@@ -1,50 +1,45 @@
+import { getQuiz, submitQuiz } from "@/lib/api";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-const BASE_URL = "https://skill-garden-backend.onrender.com";
 
 export default function QuizScreen() {
   const { id } = useLocalSearchParams();
   const [quiz, setQuiz] = useState<any>(null);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/quiz/${id}`)
-      .then(res => res.json())
-      .then(data => setQuiz(data))
-      .catch(err => console.error(err));
+    async function load() {
+      const data = await getQuiz(Number(id));
+      setQuiz(data);
+    }
+    load();
   }, []);
 
-  async function submitAnswer(answerIndex: number) {
-    const res = await fetch(`${BASE_URL}/quiz/${id}/submit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answerIndex }),
-    });
-    const data = await res.json();
+  async function handleAnswer(i: number) {
+    const { correct } = await submitQuiz(Number(id), i);
 
-    if (data.correct) {
+    if (correct) {
       Alert.alert("Correct!", "You unlocked this plant!", [
-        { text: "Go to Garden", onPress: () => router.push("/garden") }
+        { text: "Go to Garden", onPress: () => router.push("/garden") },
       ]);
     } else {
-      Alert.alert("Try again", "That's not the correct answer.");
+      Alert.alert("Try again", "That's not correct.");
     }
   }
 
-  if (!quiz) return <Text style={{ padding: 20 }}>Loading quiz...</Text>;
+  if (!quiz) return <Text>Loading quiz...</Text>;
 
   return (
     <View style={styles.container}>
       <Text style={styles.question}>{quiz.question}</Text>
 
-      {quiz.options.map((opt: string, index: number) => (
+      {quiz.options.map((option: string, index: number) => (
         <TouchableOpacity
           key={index}
           style={styles.option}
-          onPress={() => submitAnswer(index)}
+          onPress={() => handleAnswer(index)}
         >
-          <Text style={styles.optionText}>{opt}</Text>
+          <Text style={styles.optionText}>{option}</Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -53,12 +48,12 @@ export default function QuizScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: 20 },
-  question: { fontSize: 24, marginBottom: 20, fontWeight: "600" },
+  question: { fontSize: 24, fontWeight: "600", marginBottom: 20 },
   option: {
-    padding: 15,
     backgroundColor: "#E7FBE7",
+    padding: 14,
     borderRadius: 10,
     marginBottom: 10,
   },
-  optionText: { fontSize: 18 }
+  optionText: { fontSize: 18 },
 });

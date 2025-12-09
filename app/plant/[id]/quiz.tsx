@@ -3,29 +3,41 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+export default function QuizStardew() {
+  const { id } = useLocalSearchParams();
+  const [quiz, setQuiz] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
-  export default function QuizStardew() {
-    const { id } = useLocalSearchParams();
-    const [quiz, setQuiz] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [selected, setSelected] = useState<number | null>(null);
-    const [feedback, setFeedback] = useState<string | null>(null);
-  
     useEffect(() => {
       async function load() {
-        console.log("➡ QuizScreen opened with id:", id);
-  
         try {
-          const quizData = await getQuiz(String(id));
-          console.log("✔ Quiz loaded:", quizData);
-          setQuiz(quizData);
-        } catch (err: any) {
-          console.log("❌ Error loading quiz:", err.message);
+          const data = await getQuiz(String(id));
+          setQuiz(data);
+        } catch (err) {
+          console.log(err);
+        } finally {
+          setLoading(false);
         }
       }
       load();
-    }, []);
+    }, [id]);
+    // useEffect(() => {
+    //   async function load() {
+    //     console.log("➡ QuizScreen opened with id:", id);
+  
+    //     try {
+    //       const quizData = await getQuiz(String(id));
+    //       console.log("✔ Quiz loaded:", quizData);
+    //       setQuiz(quizData);
+    //     } catch (err: any) {
+    //       console.log("❌ Error loading quiz:", err.message);
+    //     }
+    //   }
+    //   load();
+    // }, []);
 
   async function handleSubmit(index: number) {
     setSubmitting(true);

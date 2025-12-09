@@ -9,14 +9,14 @@ export default function QuizScreen() {
 
   useEffect(() => {
     async function load() {
-      const data = await getQuiz(Number(id));
+      const data = await getQuiz(String(id));
       setQuiz(data);
     }
     load();
   }, []);
 
   async function handleAnswer(i: number) {
-    const { correct } = await submitQuiz(Number(id), i);
+    const { correct } = await submitQuiz(String(id), i);
 
     if (correct) {
       Alert.alert("Correct!", "You unlocked this plant!", [

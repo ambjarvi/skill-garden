@@ -20,12 +20,14 @@ export async function getPlant(id: number) {
   return plants.find((p: any) => p.id === id);
 }
 
-export async function getQuiz(id: number) {
+export async function getQuiz(id: string) {
   const res = await fetch(`${BASE_URL}/quiz/${id}`);
+  if (!res.ok) throw new Error("Could not load quiz");
   return res.json();
 }
 
-export async function submitQuiz(id: number, answerIndex: number) {
+
+export async function submitQuiz(id: string, answerIndex: number) {
   const res = await fetch(`${BASE_URL}/quiz/${id}/submit`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

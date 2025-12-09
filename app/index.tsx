@@ -1,27 +1,44 @@
 import { useEffect, useState } from "react";
-import { FlatList, Text, View } from "react-native";
+import { Button, FlatList, Text, View } from "react-native";
+import { getPlants, unlockPlant } from "../.expo/lib/api";
+import { Plant } from "../.expo/types/Plant";
 
 export default function Index() {
-  const [plants, setPlants] = useState([]);
+  const [plants, setPlants] = useState<Plant[]>([]);
 
   useEffect(() => {
-    fetch("https://skill-garden-backend.onrender.com")
-      .then(res => res.json())
-      .then(data => setPlants(data))
-      .catch(err => console.error(err));
+    loadPlants();
   }, []);
+
+  async function loadPlants() {
+    const data = await getPlants();
+    setPlants(data);
+  }
+
+  async function handleUnlock(id: number) {
+    await unlockPlant(id);
+    loadPlants(); // refresh list
+  }
 
   return (
     <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Your Plants</Text>
+      <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20 }}>
+        Your Plants
+      </Text>
 
       <FlatList
         data={plants}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <Text style={{ paddingVertical: 10 }}>
-            {item.name} — {item.unlocked ? "🌱 Unlocked" : "🔒 Locked"}
-          </Text>
+          <View style={{ marginBottom: 20 }}>
+            <Text style={{ fontSize: 18 }}>
+              {item.name} — {item.unlocked ? "🌱 Unlocked" : "🔒 Locked"}
+            </Text>
+
+            {!item.unlocked && (
+              <Button title="Unlock" onPress={() => handleUnlock(item.id)} />
+            )}
+          </View>
         )}
       />
     </View>

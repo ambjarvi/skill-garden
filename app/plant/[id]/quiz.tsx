@@ -1,44 +1,64 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import plants from "../../../data/plants";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+const BASE_URL = "https://skill-garden-backend.onrender.com";
 
 export default function QuizScreen() {
   const { id } = useLocalSearchParams();
-  const router = useRouter();
-  const plant = plants.find((p) => p.id.toString() === id);
+  const [quiz, setQuiz] = useState<any>(null);
 
-  if (!plant) return <Text>Plant not found.</Text>;
+  useEffect(() => {
+    fetch(`${BASE_URL}/quiz/${id}`)
+      .then(res => res.json())
+      .then(data => setQuiz(data))
+      .catch(err => console.error(err));
+  }, []);
 
-  function handleFinishQuiz() {
-    // TODO: connect to backend to store unlocked plant
-    plant.unlocked = true; // temporary local version
+  async function submitAnswer(answerIndex: number) {
+    const res = await fetch(`${BASE_URL}/quiz/${id}/submit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ answerIndex }),
+    });
+    const data = await res.json();
 
-    router.push("/garden");
+    if (data.correct) {
+      Alert.alert("Correct!", "You unlocked this plant!", [
+        { text: "Go to Garden", onPress: () => router.push("/garden") }
+      ]);
+    } else {
+      Alert.alert("Try again", "That's not the correct answer.");
+    }
   }
+
+  if (!quiz) return <Text style={{ padding: 20 }}>Loading quiz...</Text>;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Quiz: {plant.name}</Text>
-      <Text style={styles.question}>
-        Placeholder question:  
-        {"\n"}How much sunlight does this plant need?
-      </Text>
+      <Text style={styles.question}>{quiz.question}</Text>
 
-      <TouchableOpacity style={styles.button} onPress={handleFinishQuiz}>
-        <Text style={styles.buttonText}>Finish Quiz & Unlock 🌱</Text>
-      </TouchableOpacity>
+      {quiz.options.map((opt: string, index: number) => (
+        <TouchableOpacity
+          key={index}
+          style={styles.option}
+          onPress={() => submitAnswer(index)}
+        >
+          <Text style={styles.optionText}>{opt}</Text>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 26, fontWeight: "700", marginBottom: 20 },
-  question: { fontSize: 18, marginBottom: 30 },
-  button: {
-    backgroundColor: "#6BBF59",
-    padding: 14,
+  container: { padding: 20 },
+  question: { fontSize: 24, marginBottom: 20, fontWeight: "600" },
+  option: {
+    padding: 15,
+    backgroundColor: "#E7FBE7",
     borderRadius: 10,
+    marginBottom: 10,
   },
-  buttonText: { color: "white", textAlign: "center", fontSize: 18 },
+  optionText: { fontSize: 18 }
 });

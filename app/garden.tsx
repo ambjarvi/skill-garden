@@ -1,7 +1,9 @@
 import { getPlants } from "@/lib/api";
+import {
+  plantImages
+} from "@/lib/plantImages";
 import { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
-
 export default function Garden() {
   const [unlockedPlants, setUnlockedPlants] = useState<any[]>([]);
 
@@ -25,7 +27,11 @@ export default function Garden() {
         columnWrapperStyle={{ justifyContent: "space-between" }}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Image source={{ uri: item.imageUrl }} style={styles.image} />
+            <Image
+              source={plantImages[item.name]}
+              style={{ width: 160, height: 160 }}
+              resizeMode="contain"
+            />
             <Text style={styles.name}>{item.name}</Text>
           </View>
         )}

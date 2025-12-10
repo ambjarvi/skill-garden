@@ -2,6 +2,7 @@ import { getPlant } from "@/lib/api";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { plantImages } from "@/lib/plantImages";
 
 export default function PlantDetails() {
   const { id } = useLocalSearchParams();
@@ -19,8 +20,11 @@ export default function PlantDetails() {
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: plant.imageUrl }} style={styles.image} />
-
+      <Image
+        source={plantImages[plant.id]}
+        style={{ width: 160, height: 160 }}
+        resizeMode="contain"
+      />
       <Text style={styles.title}>{plant.name}</Text>
       <Text style={styles.description}>{plant.description}</Text>
 
